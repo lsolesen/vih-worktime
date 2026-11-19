@@ -1,0 +1,705 @@
+:root {
+    --primary: #1f3347;
+    --accent: #e67e22;
+    --bg: #f3f5f7;
+    --card-bg: #ffffff;
+    --text: #243442;
+    --muted: #627382;
+    --border: #dce2e7;
+
+    --c-undervisning: #2980b9;
+    --c-vaertskab: #8e44ad;
+    --c-samvaer: #27ae60;
+    --c-rejser: #f39c12;
+    --c-tema: #8e44ad;
+    --c-plan: #c0392b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 16px;
+    line-height: 1.42;
+}
+
+.hidden { display: none !important; }
+
+/* Låseskærm */
+.lock-screen {
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lock-box {
+    background: white;
+    padding: 36px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    max-width: 420px;
+    text-align: center;
+}
+
+.admin-unlock {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.admin-unlock input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+}
+
+.admin-unlock button {
+    padding: 8px 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.error-text { color: #c0392b; font-size: 0.9em; margin-top: 10px; }
+
+/* Leder-bjælke */
+.leader-menu {
+    max-width: 1140px;
+    margin: 0 auto 14px auto;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    padding: 10px 16px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.leader-left, .leader-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.diag-bar {
+    width: 100%;
+    font-size: 0.8em;
+    color: #5d4037;
+    border-top: 1px solid #ffe082;
+    padding-top: 5px;
+    margin-top: 3px;
+}
+
+.debug-box {
+    background: #1e272e;
+    color: #d2dae2;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.78em;
+    max-height: 260px;
+    overflow: auto;
+    margin-top: 8px;
+    white-space: pre;
+}
+
+select {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 13px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--primary);
+    border: 1px solid #bbb;
+    padding: 5px 11px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85em;
+}
+
+.btn-secondary:hover {
+    background: #f4f7fa;
+}
+
+.btn-small {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+/* Hovedcontainer */
+.container {
+    max-width: 1140px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    padding: 24px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+}
+
+h1 { margin: 0; font-size: 1.5em; color: var(--primary); }
+.season-text { color: var(--muted); font-size: 0.88em; }
+
+.header-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: var(--primary);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+}
+
+.badge-outline {
+    background: #eef3f7;
+    color: var(--primary);
+    border: 1px solid #cbd6e0;
+}
+
+h2 {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 5px;
+    font-size: 1.08em;
+    margin: 0 0 10px 0;
+    color: var(--primary);
+}
+
+/* Kollapsbar ugefordeling + konsolideret signaturforklaring */
+.timeline-section {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #eef2f5;
+}
+
+.section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.title-with-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.title-with-toggle h2 {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.btn-toggle {
+    background: #eef3f7;
+    color: var(--primary);
+    border: 1px solid #cbd6e0;
+    padding: 3px 10px;
+    border-radius: 14px;
+    font-size: 0.78em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-toggle:hover {
+    background: #e1eaf1;
+}
+
+.weeks-body { margin-top: 12px; }
+.weeks-body.collapsed { display: none; }
+
+.week-summary-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.78em;
+}
+
+.w-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f4f7fa;
+    border: 1px solid #d5dfe8;
+    padding: 3px 9px;
+    border-radius: 14px;
+    color: var(--primary);
+}
+
+.w-pill b {
+    font-weight: 700;
+    color: #4a5a6a;
+}
+
+.leg-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.semester-block { margin-bottom: 10px; }
+.semester-label {
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 3px;
+}
+
+.timeline {
+    display: flex;
+    gap: 3px;
+    background: #eef1f4;
+    padding: 4px;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.timeline-sommer { max-width: 260px; }
+
+.week-cell {
+    flex: 1;
+    min-width: 32px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #d5dce2;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.week-cell:hover { transform: translateY(-2px); }
+
+.week-cell-head {
+    font-size: 0.68em;
+    font-weight: 700;
+    color: #4a5a6a;
+    background: #f7f9fb;
+    padding: 1px 0;
+    border-bottom: 1px solid #e4e9ee;
+}
+
+.week-cell-body {
+    font-size: 0.74em;
+    font-weight: 700;
+    padding: 4px 2px;
+    color: white;
+}
+
+.w-1 { background: var(--c-undervisning); }
+.w-u, .w-p { background: #8c9ba5; }
+.w-F, .w-FF { background: #d64541; }
+.w-O { background: #2c3e50; }
+.w-S { background: #16a085; }
+.w-tema { background: var(--c-tema); }
+.w-rejse { background: var(--c-rejser); color: #1a1a1a; }
+
+.click-hint-row {
+    margin-top: 6px;
+    font-size: 0.76em;
+    color: var(--muted);
+    font-style: italic;
+}
+
+.week-detail-banner {
+    margin-top: 8px;
+    background: #eef6fc;
+    border: 1px solid #b8daff;
+    color: #1b4f72;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 0.84em;
+}
+
+.shared-weeks-box {
+    margin-top: 12px;
+    background: #f8fafb;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+.shared-weeks-box h3 {
+    margin: 0 0 6px 0;
+    font-size: 0.86em;
+    color: var(--primary);
+}
+
+.shared-weeks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 6px;
+}
+
+.shared-week-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--c-rejser);
+    padding: 5px 9px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.shared-week-card.is-tema {
+    border-left-color: var(--c-tema);
+}
+
+.shared-week-card.is-sommer {
+    border-left-color: #16a085;
+}
+
+/* 2-kolonne layout */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1.12fr 0.88fr;
+    gap: 28px;
+    align-items: start;
+}
+
+/* Nedtællings-regnskab i venstre kolonne */
+.ledger-card {
+    background: #f9fbfc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    break-inside: avoid;
+}
+
+.ledger-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 5px;
+    font-size: 0.89em;
+    border-bottom: 1px dashed #e3e8ec;
+}
+
+.ledger-row:last-child { border-bottom: none; }
+
+.ledger-expandable {
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.12s ease;
+}
+
+.ledger-expandable:hover { background-color: #f1f5f8; }
+
+.ledger-caret {
+    font-size: 0.74em;
+    color: #95a5a6;
+    margin-left: 5px;
+}
+
+.ledger-row.start-row {
+    font-weight: 700;
+    font-size: 0.98em;
+    color: var(--primary);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 7px;
+    margin-bottom: 3px;
+}
+
+.ledger-title {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.fulltime-tag {
+    display: inline-block;
+    font-size: 0.76em;
+    font-weight: 600;
+    background: #fff3e0;
+    color: #b95800;
+    border: 1px solid #ffd8a8;
+    padding: 0 7px;
+    border-radius: 10px;
+    margin-left: 6px;
+}
+
+.ledger-sub {
+    display: block;
+    font-size: 0.78em;
+    color: var(--muted);
+    font-weight: normal;
+    margin-top: 1px;
+}
+
+.ledger-sub-list {
+    list-style: none;
+    margin: 4px 0 2px 0;
+    padding: 4px 8px;
+    background: #edf2f6;
+    border-left: 3px solid #b0bec5;
+    border-radius: 4px;
+    font-size: 0.78em;
+    color: #425464;
+}
+
+.ledger-sub-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5px 0;
+    gap: 8px;
+}
+
+.ledger-sub-list li span:last-child {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sub-ft { color: #9a5b13; font-weight: normal; }
+
+.ledger-minus {
+    color: #4a5a6a;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
+.ledger-subtotal {
+    background: #eef4f8;
+    border: 1px solid #c9d8e4;
+    border-radius: 6px;
+    padding: 7px 9px;
+    margin: 6px 0;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: none;
+}
+
+.ledger-final {
+    background: #eafaf1;
+    border: 1px solid #a9dfbf;
+    border-radius: 6px;
+    padding: 8px 9px;
+    margin-top: 6px;
+    font-weight: 700;
+    font-size: 0.98em;
+    color: #1e8449;
+    border-bottom: none;
+}
+
+.ledger-final.negative {
+    background: #fdedec;
+    border-color: #f5b7b1;
+    color: #c0392b;
+}
+
+.section-subtext {
+    font-size: 0.78em;
+    color: var(--muted);
+    margin: -6px 0 8px 0;
+}
+
+/* Kompakte opgaver & funktionsplan */
+.cat-header {
+    font-size: 0.72em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin: 10px 0 3px 0;
+    font-weight: 700;
+}
+
+.compact-item {
+    border-bottom: 1px dashed var(--border);
+    padding: 5px 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.12s ease;
+    break-inside: avoid;
+}
+
+.compact-item:last-child { border-bottom: none; }
+.compact-item:hover { background-color: #f7f9fb; }
+
+.compact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.compact-title {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.compact-peers {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.92em;
+}
+
+.compact-caret {
+    font-size: 0.72em;
+    color: #95a5a6;
+    margin-left: 4px;
+}
+
+.compact-val {
+    font-weight: 700;
+    font-size: 0.88em;
+    color: var(--primary);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.compact-drawer {
+    margin-top: 4px;
+    padding: 4px 8px;
+    background: #f1f5f8;
+    border-left: 3px solid var(--c-undervisning);
+    border-radius: 3px;
+    font-size: 0.78em;
+    color: #34495e;
+}
+
+.compact-drawer.fp-drawer { border-left-color: #8e44ad; }
+
+.fp-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+}
+.fp-header-row h2 { border: none; padding: 0; margin: 0; }
+.fp-pill {
+    background: #eef3f7;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.82em;
+    padding: 2px 9px;
+    border-radius: 12px;
+}
+
+.fp-pill.ff-ok {
+    background: #eafaf1;
+    color: #1e8449;
+    border: 1px solid #a9dfbf;
+}
+
+.fp-pill.ff-over {
+    background: #fdedec;
+    color: #c0392b;
+    border: 1px solid #f5b7b1;
+}
+
+/* Ferieønsker & regler */
+.ferie-rules-box {
+    background: #f4f7fa;
+    border-left: 3px solid #7f8c8d;
+    border-radius: 4px;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+    font-size: 0.78em;
+    color: #3b4b59;
+    line-height: 1.38;
+    break-inside: avoid;
+}
+
+.ferie-rules-note {
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.ferie-card {
+    background: #fdfdfe;
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 7px;
+    font-size: 0.84em;
+    break-inside: avoid;
+}
+
+.ferie-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.ferie-body {
+    color: #4a5a6a;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed var(--border);
+    font-size: 0.92em;
+}
+
+.status-pill {
+    font-size: 0.8em;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.status-godkendt { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+.status-registreret { background: #ebf5fb; color: #1f618d; border: 1px solid #aed6f1; }
+.status-afvist { background: #fdedec; color: #c0392b; border: 1px solid #f5b7b1; }
+.status-afventer { background: #fef9e7; color: #b7950b; border: 1px solid #fad7a1; }
+
+@media (max-width: 850px) {
+    .grid-2col { grid-template-columns: 1fr; }
+}
+
+@media print {
+    @page { margin: 10mm; }
+    body { background: white; padding: 0; font-size: 11px; }
+    .container { box-shadow: none; padding: 0; max-width: 100%; }
+    .no-print { display: none !important; }
+    .compact-caret, .ledger-caret { display: none; }
+}
