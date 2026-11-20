@@ -83,9 +83,14 @@
                     <div class="click-hint-row">Klik på en uge for at se indhold og kolleger</div>
                     <div id="week-detail-banner" class="week-detail-banner hidden"></div>
 
-                    <div class="shared-weeks-box">
-                        <h3>Særlige uger & hvem du er afsted / hjemme med</h3>
-                        <div id="shared-weeks-container" class="shared-weeks-grid"></div>
+                    <div class="shared-weeks-box" id="shared-weeks-box">
+                        <div class="shared-weeks-header">
+                            <h3>Særlige uger & hvem du er afsted / hjemme med</h3>
+                            <button id="toggle-shared-weeks-btn" class="btn-toggle no-print" type="button">Skjul særlige uger ▴</button>
+                        </div>
+                        <div id="shared-weeks-collapsible-body" class="shared-weeks-body">
+                            <div id="shared-weeks-container" class="shared-weeks-grid"></div>
+                        </div>
                     </div>
                 </div>
             </section>

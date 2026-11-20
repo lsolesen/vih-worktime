@@ -861,6 +861,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     setWeeksExpanded(localStorage.getItem("weeks_expanded") === "1");
     toggleWeeksBtn.addEventListener("click", () => setWeeksExpanded(weeksBody.classList.contains("collapsed")));
 
+    const toggleSharedWeeksBtn = document.getElementById("toggle-shared-weeks-btn");
+    const sharedWeeksBody = document.getElementById("shared-weeks-collapsible-body");
+    const sharedWeeksBox = document.getElementById("shared-weeks-box");
+    const setSharedWeeksExpanded = (expanded) => {
+        if (!sharedWeeksBody || !toggleSharedWeeksBtn) return;
+        sharedWeeksBody.classList.toggle("collapsed", !expanded);
+        if (sharedWeeksBox) sharedWeeksBox.classList.toggle("is-collapsed", !expanded);
+        toggleSharedWeeksBtn.textContent = expanded ? "Skjul særlige uger ▴" : "Vis særlige uger ▾";
+        localStorage.setItem("shared_weeks_expanded", expanded ? "1" : "0");
+    };
+    if (toggleSharedWeeksBtn) {
+        const savedShared = localStorage.getItem("shared_weeks_expanded");
+        setSharedWeeksExpanded(savedShared === null ? true : savedShared === "1");
+        toggleSharedWeeksBtn.addEventListener("click", () =>
+            setSharedWeeksExpanded(sharedWeeksBody.classList.contains("collapsed"))
+        );
+    }
+
     try {
         await loadAndRenderAll(getCurrentTeacher, false);
     } catch (err) {

@@ -155,6 +155,48 @@ select {
     color: var(--muted);
 }
 
+.sim-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid #ffd54f;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.84em;
+    color: var(--primary);
+}
+
+.btn-step {
+    background: #eef3f7;
+    border: 1px solid #cbd6e0;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-step:hover {
+    background: #dce6ef;
+}
+
+.wish-toggle-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: white;
+    border: 1px solid #ffd54f;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.84em;
+    font-weight: 600;
+    color: var(--primary);
+    cursor: pointer;
+    user-select: none;
+}
+
 /* Hovedcontainer */
 .container {
     max-width: 1140px;
@@ -207,7 +249,38 @@ h2 {
     color: var(--primary);
 }
 
-/* Kollapsbar ugefordeling + konsolideret signaturforklaring */
+/* Faner */
+.app-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 18px;
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 8px 14px;
+    margin-bottom: -2px;
+    font-size: 0.92em;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab-btn:hover {
+    color: var(--primary);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Kollapsbar ugefordeling + signaturforklaring */
 .timeline-section {
     margin-bottom: 20px;
     padding-bottom: 12px;
@@ -250,7 +323,10 @@ h2 {
 }
 
 .weeks-body { margin-top: 12px; }
-.weeks-body.collapsed { display: none; }
+.weeks-body.collapsed,
+.shared-weeks-body.collapsed {
+    display: none !important;
+}
 
 .week-summary-pills {
     display: flex;
@@ -291,20 +367,28 @@ h2 {
     margin-bottom: 3px;
 }
 
+/* Ugegrid uden vandret scrollbar – rammen slutter tæt om antal uger i hvert semester */
 .timeline {
-    display: flex;
-    gap: 3px;
+    --cols: 26;
+    --gap: 3px;
+    --pad: 8px;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: var(--gap);
+    width: calc(var(--pad) + var(--cols) * ((100% - var(--pad) - 25 * var(--gap)) / 26) + (var(--cols) - 1) * var(--gap));
     background: #eef1f4;
     padding: 4px;
     border-radius: 6px;
-    overflow-x: auto;
+    overflow: visible;
 }
 
-.timeline-sommer { max-width: 260px; }
+#timeline-efteraar { --cols: 21; }
+#timeline-foraar { --cols: 26; }
+#timeline-sommer { --cols: 5; }
 
 .week-cell {
-    flex: 1;
-    min-width: 32px;
+    min-width: 0;
+    width: auto;
     border-radius: 4px;
     overflow: hidden;
     background: white;
@@ -317,19 +401,43 @@ h2 {
 .week-cell:hover { transform: translateY(-2px); }
 
 .week-cell-head {
+    position: relative;
     font-size: 0.68em;
     font-weight: 700;
     color: #4a5a6a;
     background: #f7f9fb;
-    padding: 1px 0;
+    padding: 2px 0;
     border-bottom: 1px solid #e4e9ee;
+}
+
+.week-wish-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #e67e22;
 }
 
 .week-cell-body {
     font-size: 0.74em;
     font-weight: 700;
-    padding: 4px 2px;
+    padding: 4px 0;
     color: white;
+}
+
+@media (max-width: 680px) {
+    .timeline {
+        display: flex;
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .week-cell {
+        min-width: 30px;
+    }
 }
 
 .w-1 { background: var(--c-undervisning); }
@@ -357,6 +465,12 @@ h2 {
     font-size: 0.84em;
 }
 
+.banner-wish-note {
+    color: #8e44ad;
+    font-weight: 600;
+}
+
+/* Særlige uger (foldbar) */
 .shared-weeks-box {
     margin-top: 12px;
     background: #f8fafb;
@@ -365,10 +479,21 @@ h2 {
     padding: 10px 12px;
 }
 
-.shared-weeks-box h3 {
-    margin: 0 0 6px 0;
+.shared-weeks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.shared-weeks-header h3 {
+    margin: 0;
     font-size: 0.86em;
     color: var(--primary);
+}
+
+.shared-weeks-body {
+    margin-top: 8px;
 }
 
 .shared-weeks-grid {
@@ -392,6 +517,21 @@ h2 {
 
 .shared-week-card.is-sommer {
     border-left-color: #16a085;
+}
+
+.shared-week-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.unfulfilled-weeks-line {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+    font-size: 0.79em;
+    color: #5d6d7e;
 }
 
 /* 2-kolonne layout */
@@ -533,6 +673,28 @@ h2 {
     color: #c0392b;
 }
 
+.ledger-reductions-wrap {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed #cfd8dc;
+}
+
+.ledger-reduction {
+    background: #f4fbf7;
+    border-left: 3px solid #27ae60;
+    border-radius: 4px;
+    padding-left: 8px;
+    margin-bottom: 4px;
+}
+
+.ledger-plus {
+    color: #1e8449;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
 .section-subtext {
     font-size: 0.78em;
     color: var(--muted);
@@ -606,6 +768,75 @@ h2 {
 
 .compact-drawer.fp-drawer { border-left-color: #8e44ad; }
 
+/* Ønske-badges & fold-ud for ikke-indfriede opgaver */
+.wish-tag-ok {
+    display: inline-block;
+    font-size: 0.76em;
+    font-weight: 600;
+    color: #1e8449;
+    background: #eafaf1;
+    border: 1px solid #b7e4c7;
+    padding: 0 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.wish-tag-flex {
+    display: inline-block;
+    font-size: 0.76em;
+    font-weight: 600;
+    color: #1f618d;
+    background: #ebf5fb;
+    border: 1px solid #aed6f1;
+    padding: 0 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.wish-tag-diff {
+    display: inline-block;
+    font-size: 0.76em;
+    font-weight: 600;
+    color: #9a5b13;
+    background: #fff8e7;
+    border: 1px solid #f5cba7;
+    padding: 0 6px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.unfulfilled-tasks-box {
+    margin-top: 10px;
+    background: #f8fafb;
+    border: 1px dashed #cbd6e0;
+    border-radius: 5px;
+    padding: 6px 9px;
+    font-size: 0.8em;
+    color: var(--muted);
+}
+
+.unfulfilled-tasks-toggle {
+    cursor: pointer;
+    font-weight: 600;
+    color: #4a5a6a;
+}
+
+.unfulfilled-tasks-list {
+    list-style: none;
+    margin: 5px 0 0 0;
+    padding: 4px 0 0 8px;
+    border-top: 1px dashed #dce2e7;
+}
+
+.unfulfilled-tasks-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    gap: 8px;
+}
+
 .fp-header-row {
     display: flex;
     justify-content: space-between;
@@ -658,11 +889,20 @@ h2 {
 .ferie-card {
     background: #fdfdfe;
     border: 1px solid var(--border);
+    border-left: 4px solid #8c9ba5;
     padding: 8px 10px;
     border-radius: 6px;
     margin-bottom: 7px;
     font-size: 0.84em;
     break-inside: avoid;
+}
+
+.ferie-card.is-ferie {
+    border-left-color: #d64541;
+}
+
+.ferie-card.is-orlov {
+    border-left-color: #2c3e50;
 }
 
 .ferie-header {
@@ -691,254 +931,6 @@ h2 {
 .status-registreret { background: #ebf5fb; color: #1f618d; border: 1px solid #aed6f1; }
 .status-afvist { background: #fdedec; color: #c0392b; border: 1px solid #f5b7b1; }
 .status-afventer { background: #fef9e7; color: #b7950b; border: 1px solid #fad7a1; }
-
-@media (max-width: 850px) {
-    .grid-2col { grid-template-columns: 1fr; }
-}
-
-@media print {
-    @page { margin: 10mm; }
-    body { background: white; padding: 0; font-size: 11px; }
-    .container { box-shadow: none; padding: 0; max-width: 100%; }
-    .no-print { display: none !important; }
-    .compact-caret, .ledger-caret { display: none; }
-}
-
-.ferie-card {
-    background: #fdfdfe;
-    border: 1px solid var(--border);
-    border-left: 4px solid #8c9ba5;
-    padding: 8px 10px;
-    border-radius: 6px;
-    margin-bottom: 7px;
-    font-size: 0.84em;
-    break-inside: avoid;
-}
-
-.ferie-card.is-ferie {
-    border-left-color: #d64541;
-}
-
-.ferie-card.is-orlov {
-    border-left-color: #2c3e50;
-}
-
-/* Leder-stepper & reduktionslinjer i regnskab */
-.sim-stepper {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: white;
-    border: 1px solid #ffd54f;
-    padding: 3px 9px;
-    border-radius: 6px;
-    font-size: 0.84em;
-    color: var(--primary);
-}
-
-.btn-step {
-    background: #eef3f7;
-    border: 1px solid #cbd6e0;
-    border-radius: 4px;
-    width: 22px;
-    height: 22px;
-    font-weight: 700;
-    cursor: pointer;
-    line-height: 1;
-}
-
-.btn-step:hover {
-    background: #dce6ef;
-}
-
-.ledger-pre-red {
-    font-weight: 600;
-    color: var(--primary);
-    border-top: 1px solid #d5dfe8;
-    margin-top: 4px;
-}
-
-.ledger-reduction {
-    background: #f4fbf7;
-    border-left: 3px solid #27ae60;
-    padding-left: 8px;
-}
-
-.ledger-plus {
-    color: #1e8449;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    margin-left: 12px;
-}
-
-.ledger-reductions-wrap {
-    margin-top: 8px;
-    padding-top: 6px;
-    border-top: 1px dashed #cfd8dc;
-}
-
-.ledger-reduction {
-    background: #f4fbf7;
-    border-left: 3px solid #27ae60;
-    border-radius: 4px;
-    padding-left: 8px;
-    margin-bottom: 4px;
-}
-
-.ledger-plus {
-    color: #1e8449;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    margin-left: 12px;
-}
-
-/* Faner */
-.app-tabs {
-    display: flex;
-    gap: 8px;
-    border-bottom: 2px solid var(--border);
-    margin-bottom: 18px;
-    padding-bottom: 0;
-}
-
-.tab-btn {
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 8px 14px;
-    margin-bottom: -2px;
-    font-size: 0.92em;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.tab-btn:hover {
-    color: var(--primary);
-}
-
-.tab-btn.active {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-}
-
-/* Fagønsker-tabel (5 perioder) */
-.fag-table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: white;
-}
-
-.fag-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85em;
-    min-width: 820px;
-}
-
-.fag-table th {
-    background: #f1f5f8;
-    color: var(--primary);
-    text-align: left;
-    padding: 9px 10px;
-    border-bottom: 2px solid var(--border);
-    font-size: 0.84em;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-}
-
-.fag-table th small {
-    display: block;
-    font-weight: 500;
-    text-transform: none;
-    color: var(--muted);
-    font-size: 0.85em;
-}
-
-.fag-table td {
-    padding: 10px 10px;
-    border-bottom: 1px solid #e6ecf0;
-    vertical-align: top;
-}
-
-.fag-table tr:last-child td {
-    border-bottom: none;
-}
-
-.fag-table tr.is-empty-period {
-    background: #fafbfc;
-    color: var(--muted);
-}
-
-.fag-period-cell {
-    width: 145px;
-    background: #f9fbfc;
-    border-right: 1px solid var(--border);
-}
-
-.fag-period-title {
-    font-weight: 700;
-    color: var(--primary);
-    display: block;
-}
-
-.fag-period-hours {
-    display: inline-block;
-    margin-top: 4px;
-    font-size: 0.82em;
-    background: #eef3f7;
-    color: var(--primary);
-    padding: 2px 7px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.fag-p1 {
-    font-weight: 600;
-    color: var(--primary);
-    display: block;
-}
-
-.fag-peers {
-    font-weight: 400;
-    color: var(--muted);
-    font-size: 0.9em;
-}
-
-.fag-p2 {
-    display: block;
-    font-size: 0.86em;
-    color: var(--muted);
-    margin-top: 3px;
-}
-
-.fag-note {
-    display: block;
-    font-size: 0.82em;
-    color: #8e44ad;
-    font-style: italic;
-    margin-top: 3px;
-}
-
-.fag-yes-pill {
-    display: inline-block;
-    background: #eafaf1;
-    color: #1e8449;
-    border: 1px solid #a9dfbf;
-    font-weight: 700;
-    font-size: 0.84em;
-    padding: 2px 8px;
-    border-radius: 12px;
-}
-
-.fag-no-dash {
-    color: #bdc3c7;
-}
 
 /* Fagønsker-kort (5 perioder) */
 .fag-cards-list {
@@ -1093,6 +1085,10 @@ h2 {
     gap: 2px;
 }
 
+@media (max-width: 850px) {
+    .grid-2col { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 780px) {
     .fag-card-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1106,120 +1102,248 @@ h2 {
     }
 }
 
-/* Diskret ønske-sammenligning */
-.wish-toggle-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: white;
-    border: 1px solid #ffd54f;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.84em;
-    font-weight: 600;
-    color: var(--primary);
-    cursor: pointer;
-    user-select: none;
-}
+/* =========================================================
+   PRINT / PDF (A4 stående, 1 side, uden scrollbars)
+   ========================================================= */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 6mm 7mm;
+    }
 
-.week-cell-head {
-    position: relative;
-}
+    body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 11px !important;
+        line-height: 1.28 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 
-.week-wish-dot {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #e67e22;
-}
+    .container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
 
-.banner-wish-note {
-    color: #8e44ad;
-    font-weight: 600;
-}
+    .no-print,
+    .app-tabs,
+    .compact-caret,
+    .ledger-caret,
+    .section-subtext,
+    .click-hint-row {
+        display: none !important;
+    }
 
-.shared-week-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 6px;
-}
+    header {
+        padding-bottom: 5px !important;
+        margin-bottom: 6px !important;
+    }
 
-.wish-tag-ok {
-    display: inline-block;
-    font-size: 0.76em;
-    font-weight: 600;
-    color: #1e8449;
-    background: #eafaf1;
-    border: 1px solid #b7e4c7;
-    padding: 0 6px;
-    border-radius: 10px;
-    margin-left: 4px;
-    white-space: nowrap;
-}
+    h1 {
+        font-size: 1.32em !important;
+    }
 
-.wish-tag-flex {
-    display: inline-block;
-    font-size: 0.76em;
-    font-weight: 600;
-    color: #1f618d;
-    background: #ebf5fb;
-    border: 1px solid #aed6f1;
-    padding: 0 6px;
-    border-radius: 10px;
-    margin-left: 4px;
-    white-space: nowrap;
-}
+    h2 {
+        font-size: 1.02em !important;
+        padding-bottom: 2px !important;
+        margin-bottom: 5px !important;
+    }
 
-.wish-tag-diff {
-    display: inline-block;
-    font-size: 0.76em;
-    font-weight: 600;
-    color: #9a5b13;
-    background: #fff8e7;
-    border: 1px solid #f5cba7;
-    padding: 0 6px;
-    border-radius: 10px;
-    white-space: nowrap;
-}
+    .timeline-section {
+        margin-bottom: 8px !important;
+        padding-bottom: 5px !important;
+    }
 
-.unfulfilled-weeks-line {
-    margin-top: 8px;
-    padding-top: 6px;
-    border-top: 1px dashed var(--border);
-    font-size: 0.79em;
-    color: #5d6d7e;
-}
+    .w-pill {
+        font-size: 0.82em !important;
+        padding: 1px 6px !important;
+    }
 
-.unfulfilled-tasks-box {
-    margin-top: 10px;
-    background: #f8fafb;
-    border: 1px dashed #cbd6e0;
-    border-radius: 5px;
-    padding: 6px 9px;
-    font-size: 0.8em;
-    color: var(--muted);
-}
+    .semester-block {
+        margin-bottom: 4px !important;
+    }
 
-.unfulfilled-tasks-toggle {
-    cursor: pointer;
-    font-weight: 600;
-    color: #4a5a6a;
-}
+    .semester-label {
+        font-size: 0.74em !important;
+        margin-bottom: 2px !important;
+    }
 
-.unfulfilled-tasks-list {
-    list-style: none;
-    margin: 5px 0 0 0;
-    padding: 4px 0 0 8px;
-    border-top: 1px dashed #dce2e7;
-}
+    /* Ugegrid uden scrollbars – ens cellebredde for Efterår (21), Forår (26) og Sommer (5) */
+    .timeline {
+        --gap: 2px;
+        --pad: 8px;
+        display: grid !important;
+        grid-template-columns: repeat(var(--cols), minmax(0, 1fr)) !important;
+        gap: var(--gap) !important;
+        width: calc(var(--pad) + var(--cols) * ((100% - var(--pad) - 25 * var(--gap)) / 26) + (var(--cols) - 1) * var(--gap)) !important;
+        padding: 4px !important;
+        overflow: visible !important;
+    }
 
-.unfulfilled-tasks-list li {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
-    gap: 8px;
+    .week-cell {
+        min-width: 0 !important;
+        width: auto !important;
+    }
+
+    .week-cell-head {
+        font-size: 7.5px !important;
+        padding: 1px 0 !important;
+    }
+
+    .week-cell-body {
+        font-size: 8px !important;
+        padding: 2px 0 !important;
+    }
+
+    /* Skjul hele Særlige uger-boksen ved print, hvis den er foldet sammen */
+    .shared-weeks-box.is-collapsed {
+        display: none !important;
+    }
+
+    .shared-weeks-box {
+        margin-top: 6px !important;
+        padding: 6px 8px !important;
+        break-inside: avoid;
+    }
+
+    .shared-weeks-header h3 {
+        font-size: 0.78em !important;
+    }
+
+    .shared-weeks-body {
+        margin-top: 4px !important;
+    }
+
+    .shared-weeks-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 5px !important;
+    }
+
+    .shared-week-card {
+        padding: 4px 6px !important;
+        font-size: 0.78em !important;
+        line-height: 1.24 !important;
+    }
+
+    .unfulfilled-weeks-line {
+        margin-top: 5px !important;
+        padding-top: 4px !important;
+        font-size: 0.76em !important;
+    }
+
+    /* Bevar 2 kolonner side om side på A4-print (overstyrer max-width: 850px) */
+    .grid-2col {
+        display: grid !important;
+        grid-template-columns: 1.08fr 0.92fr !important;
+        gap: 15px !important;
+        align-items: start !important;
+    }
+
+    .ledger-card {
+        padding: 6px 9px !important;
+        break-inside: avoid;
+    }
+
+    .ledger-row {
+        padding: 3px 2px !important;
+        font-size: 0.94em !important;
+    }
+
+    .ledger-row.start-row {
+        padding-bottom: 4px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .ledger-sub {
+        font-size: 0.82em !important;
+    }
+
+    .ledger-subtotal,
+    .ledger-final {
+        padding: 4px 7px !important;
+        margin: 3px 0 !important;
+        font-size: 0.96em !important;
+    }
+
+    .ledger-reductions-wrap {
+        margin-top: 3px !important;
+        padding-top: 3px !important;
+    }
+
+    .col-left h2[style] {
+        margin-top: 10px !important;
+    }
+
+    .cat-header {
+        margin: 5px 0 2px 0 !important;
+        font-size: 0.75em !important;
+    }
+
+    .compact-item {
+        padding: 2.5px 2px !important;
+    }
+
+    .compact-title,
+    .compact-val {
+        font-size: 0.93em !important;
+        line-height: 1.24 !important;
+    }
+
+    .compact-peers,
+    .wish-tag-ok,
+    .wish-tag-flex,
+    .wish-tag-diff {
+        font-size: 0.82em !important;
+    }
+
+    .fp-header-row {
+        padding-bottom: 2px !important;
+        margin-bottom: 5px !important;
+    }
+
+    .col-right .fp-header-row[style] {
+        margin-top: 10px !important;
+    }
+
+    .ferie-rules-box {
+        padding: 4px 8px !important;
+        margin-bottom: 6px !important;
+        font-size: 0.8em !important;
+        line-height: 1.24 !important;
+    }
+
+    .ferie-card {
+        padding: 4px 8px !important;
+        margin-bottom: 4px !important;
+        font-size: 0.92em !important;
+        break-inside: avoid;
+    }
+
+    .ferie-body {
+        margin-top: 2px !important;
+        padding-top: 2px !important;
+        font-size: 0.88em !important;
+    }
+
+    /* Fagønske-fanen (5 perioder) ved print */
+    .fag-cards-list {
+        gap: 6px !important;
+    }
+
+    .fag-card-header {
+        padding: 5px 10px !important;
+    }
+
+    .fag-col {
+        padding: 5px 8px !important;
+    }
+
+    .fag-card-notes {
+        padding: 4px 10px !important;
+    }
 }
