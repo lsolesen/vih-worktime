@@ -1,6 +1,8 @@
 let allTeachers = {};
 let isAdmin = false;
 let rawDebugSnapshot = "";
+let simVaertReduktionCount = 0;
+let showWishes = true;
 
 function renderWeeksSection(t) {
     const formatWeekCode = (code) => {
@@ -28,27 +30,46 @@ function renderWeeksSection(t) {
     const renderTimeline = (elId, weeks, semesterLabel) => {
         const el = document.getElementById(elId);
         el.innerHTML = "";
-        weeks.forEach((w) => {
+        weeks.forEach((weekObj) => {
             const cell = document.createElement("div");
             let cls = "w-1";
-            if (["u", "p"].includes(w.code)) cls = `w-${w.code}`;
-            else if (["F", "FF"].includes(w.code)) cls = "w-F";
-            else if (w.code === "O" || w.code === "x") cls = "w-O";
-            else if (w.code === "S") cls = "w-S";
-            else if (w.category === "tema") cls = "w-tema";
-            else if (w.category === "rejse") cls = "w-rejse";
+            if (["u", "p"].includes(weekObj.code)) cls = `w-${weekObj.code}`;
+            else if (["F", "FF"].includes(weekObj.code)) cls = "w-F";
+            else if (weekObj.code === "O" || weekObj.code === "x") cls = "w-O";
+            else if (weekObj.code === "S") cls = "w-S";
+            else if (weekObj.category === "tema") cls = "w-tema";
+            else if (weekObj.category === "rejse") cls = "w-rejse";
 
-            cell.className = "week-cell";
-            const peerStr = w.peers.length ? `Sammen med: ${w.peers.join(", ")}` : "";
-            const codeLabel = formatWeekCode(w.code);
-            cell.title = `${semesterLabel} uge ${w.ugeNr}: ${w.titel} (${codeLabel})${peerStr ? " · " + peerStr : ""}`;
+            const hasWishDiff = showWishes && weekObj.wishedCode && weekObj.wishMatched === false;
+            cell.className = `week-cell${hasWishDiff ? " has-wish-diff" : ""}`;
+
+            const peerStr = weekObj.peers.length ? `Sammen med: ${weekObj.peers.join(", ")}` : "";
+            const wishStr =
+                showWishes && weekObj.wishedCode
+                    ? weekObj.wishMatched
+                        ? `Ønsket: ${weekObj.wishedCode} ✓`
+                        : `Ønsket: ${weekObj.wishedCode}`
+                    : "";
+            const codeLabel = formatWeekCode(weekObj.code);
+
+            cell.title = [
+                `${semesterLabel} uge ${weekObj.ugeNr}: ${weekObj.titel} (${codeLabel})`,
+                peerStr,
+                wishStr
+            ]
+                .filter(Boolean)
+                .join(" · ");
+
             cell.innerHTML = `
-                <div class="week-cell-head">${w.ugeNr}</div>
-                <div class="week-cell-body ${cls}">${w.code}</div>
+                <div class="week-cell-head">${weekObj.ugeNr}${hasWishDiff ? `<span class="week-wish-dot"></span>` : ""}</div>
+                <div class="week-cell-body ${cls}">${weekObj.code}</div>
             `;
             cell.addEventListener("click", () => {
                 banner.classList.remove("hidden");
-                banner.innerHTML = `<strong>${semesterLabel} – Uge ${w.ugeNr} (${codeLabel}):</strong> ${w.titel}${peerStr ? ` &nbsp;|&nbsp; <strong>${peerStr}</strong>` : ""}`;
+                const parts = [`<strong>${semesterLabel} – Uge ${weekObj.ugeNr} (${codeLabel}):</strong> ${weekObj.titel}`];
+                if (peerStr) parts.push(`<strong>${peerStr}</strong>`);
+                if (wishStr) parts.push(`<span class="banner-wish-note">${wishStr}</span>`);
+                banner.innerHTML = parts.join(" &nbsp;|&nbsp; ");
             });
             el.appendChild(cell);
         });
@@ -63,15 +84,46 @@ function renderWeeksSection(t) {
     if (!t.delteUger.length) {
         sharedContainer.innerHTML = `<div style="font-size:0.83em;color:var(--muted);">Ingen særlige rejse- eller temauger registreret.</div>`;
     } else {
-        t.delteUger.forEach((dw) => {
-            const peersText = dw.peers.length ? dw.peers.join(", ") : "Ingen andre med samme kode";
-            const cardModifier = dw.category === "tema" ? " is-tema" : dw.category === "sommer" ? " is-sommer" : "";
+        t.delteUger.forEach((sharedWeek) => {
+            const peersText = sharedWeek.peers.length ? sharedWeek.peers.join(", ") : "Ingen andre med samme kode";
+            const cardModifier =
+                sharedWeek.category === "tema"
+                    ? " is-tema"
+                    : sharedWeek.category === "sommer"
+                      ? " is-sommer"
+                      : "";
+
+            let wishBadgeHtml = "";
+            if (showWishes && sharedWeek.wishedCode) {
+                wishBadgeHtml = sharedWeek.wishMatched
+                    ? `<span class="wish-tag-ok">✓ Ønsket</span>`
+                    : `<span class="wish-tag-diff">Ønsket: ${sharedWeek.wishedCode}</span>`;
+            }
+
             sharedContainer.innerHTML += `
                 <div class="shared-week-card${cardModifier}">
-                    <strong>${dw.semester} uge ${dw.ugeNr} (${formatWeekCode(dw.code)})</strong> – ${dw.titel}<br>
-                    <span style="color:var(--muted);">Sammen med: <strong>${peersText}</strong></span>
+                    <div class="shared-week-top">
+                        <strong>${sharedWeek.semester} uge ${sharedWeek.ugeNr} (${formatWeekCode(sharedWeek.code)})</strong>
+                        ${wishBadgeHtml}
+                    </div>
+                    <div>${sharedWeek.titel}</div>
+                    <div style="color:var(--muted);margin-top:2px;">Sammen med: <strong>${peersText}</strong></div>
                 </div>`;
         });
+    }
+
+    const existingNote = document.getElementById("unfulfilled-weeks-note");
+    if (existingNote) existingNote.remove();
+
+    if (showWishes && t.ikkeIndfriedeUger.length > 0) {
+        const noteEl = document.createElement("div");
+        noteEl.id = "unfulfilled-weeks-note";
+        noteEl.className = "unfulfilled-weeks-line";
+        const items = t.ikkeIndfriedeUger
+            .map((diffItem) => `Uge ${diffItem.ugeNr} (ønskede <strong>${diffItem.wishedCode}</strong>, tildelt ${diffItem.actualCode})`)
+            .join(" · ");
+        noteEl.innerHTML = `Afvigelser fra ugeønsker: ${items}`;
+        sharedContainer.parentElement.appendChild(noteEl);
     }
 }
 
@@ -94,8 +146,14 @@ function renderLedger(t) {
     const opgavePuljeTilRaadighed =
         t.opgavePuljeSheet !== null ? t.opgavePuljeSheet : t.norm - iAltInden - saerligeSum;
 
-    const brugteOpgaveTimer = t.opgaver.reduce((s, o) => s + o.opgaveTimer, 0);
-    const restOpgavePulje = opgavePuljeTilRaadighed - brugteOpgaveTimer;
+    const brugteOpgaveTimer = t.opgaver.reduce((s, opgObj) => s + opgObj.opgaveTimer, 0);
+    const restFoerReduktion = opgavePuljeTilRaadighed - brugteOpgaveTimer;
+
+    const sheetReduktionerSum = t.reduktioner.reduce((s, redObj) => s + redObj.frigjorteTimer, 0);
+    const simTimer = isAdmin ? simVaertReduktionCount * (t.vaertskabSats || 7.5) : 0;
+    const harReduktioner = t.reduktioner.length > 0 || simTimer !== 0;
+
+    const endeligRest = restFoerReduktion + sheetReduktionerSum + simTimer;
 
     const ledgerEl = document.getElementById("countdown-ledger");
     ledgerEl.innerHTML = `
@@ -193,10 +251,43 @@ function renderLedger(t) {
             <div class="ledger-minus">− ${formatNum(brugteOpgaveTimer)} t</div>
         </div>
 
-        <div class="ledger-row ledger-final ${restOpgavePulje < 0 ? "negative" : ""}">
+        <div class="ledger-row ledger-final ${restFoerReduktion < 0 ? "negative" : ""}">
             <div>Rest / buffer i opgavepulje</div>
-            <div>${restOpgavePulje >= 0 ? "+" : ""}${formatNum(restOpgavePulje)} t</div>
+            <div>${restFoerReduktion >= 0 ? "+" : ""}${formatNum(restFoerReduktion)} t</div>
         </div>
+
+        ${
+            harReduktioner
+                ? `<div class="ledger-reductions-wrap">
+                    ${t.reduktioner
+                        .map(
+                            (redObj) => `<div class="ledger-row ledger-reduction">
+                                <div>
+                                    <span class="ledger-title">${redObj.navn}</span>
+                                    <span class="ledger-sub">Frigjorte timer via reduktion</span>
+                                </div>
+                                <div class="ledger-plus">+ ${formatNum(redObj.frigjorteTimer)} t</div>
+                            </div>`
+                        )
+                        .join("")}
+                    ${
+                        simTimer !== 0
+                            ? `<div class="ledger-row ledger-reduction no-print">
+                                <div>
+                                    <span class="ledger-title">Prøve-reduktion: ${simVaertReduktionCount} færre værtsskaber (à ${formatNum(t.vaertskabSats || 7.5)} t)</span>
+                                    <span class="ledger-sub">Midlertidig beregning i leder-visning</span>
+                                </div>
+                                <div class="ledger-plus">+ ${formatNum(simTimer)} t</div>
+                              </div>`
+                            : ""
+                    }
+                    <div class="ledger-row ledger-final ${endeligRest < 0 ? "negative" : ""}">
+                        <div>Ny rest / buffer efter reduktion</div>
+                        <div>${endeligRest >= 0 ? "+" : ""}${formatNum(endeligRest)} t</div>
+                    </div>
+                  </div>`
+                : ""
+        }
     `;
 
     ledgerEl.querySelectorAll(".ledger-expandable").forEach((row) => {
@@ -215,9 +306,9 @@ function renderOpgaverOgFunktioner(t) {
     const opgContainer = document.getElementById("opgaver-container");
     opgContainer.innerHTML = "";
     const opgGroups = {};
-    t.opgaver.forEach((o) => {
-        if (!opgGroups[o.kategori]) opgGroups[o.kategori] = [];
-        opgGroups[o.kategori].push(o);
+    t.opgaver.forEach((opgObj) => {
+        if (!opgGroups[opgObj.kategori]) opgGroups[opgObj.kategori] = [];
+        opgGroups[opgObj.kategori].push(opgObj);
     });
 
     if (!Object.keys(opgGroups).length) {
@@ -229,17 +320,26 @@ function renderOpgaverOgFunktioner(t) {
             catEl.textContent = kat;
             opgContainer.appendChild(catEl);
 
-            opgGroups[kat].forEach((o) => {
+            opgGroups[kat].forEach((opgObj) => {
                 const itemEl = document.createElement("div");
                 itemEl.className = "compact-item";
-                const peersSpan = o.peers.length ? ` <span class="compact-peers">(med ${o.peers.join(", ")})</span>` : "";
+                const peersSpan = opgObj.peers.length
+                    ? ` <span class="compact-peers">(med ${opgObj.peers.join(", ")})</span>`
+                    : "";
+
+                let wishBadge = "";
+                if (showWishes && opgObj.wishStatus === "x") {
+                    wishBadge = ` <span class="wish-tag-ok">✓ ønsket</span>`;
+                } else if (showWishes && opgObj.wishStatus === "/") {
+                    wishBadge = ` <span class="wish-tag-flex">~ ønsket (/)</span>`;
+                }
 
                 itemEl.innerHTML = `
                     <div class="compact-row">
-                        <div class="compact-title">${o.navn}${peersSpan}<span class="compact-caret">▸</span></div>
-                        <div class="compact-val">${formatNum(o.opgaveTimer)} t</div>
+                        <div class="compact-title">${opgObj.navn}${peersSpan}${wishBadge}<span class="compact-caret">▸</span></div>
+                        <div class="compact-val">${formatNum(opgObj.opgaveTimer)} t</div>
                     </div>
-                    <div class="compact-drawer hidden">${o.kildeTekst}</div>
+                    <div class="compact-drawer hidden">${opgObj.kildeTekst}</div>
                 `;
                 itemEl.addEventListener("click", () => {
                     const drawer = itemEl.querySelector(".compact-drawer");
@@ -251,6 +351,34 @@ function renderOpgaverOgFunktioner(t) {
                 opgContainer.appendChild(itemEl);
             });
         });
+    }
+
+    if (showWishes && t.ikkeIndfriedeOpgaver.length > 0) {
+        const unfulfilledWrap = document.createElement("div");
+        unfulfilledWrap.className = "unfulfilled-tasks-box no-print";
+        const itemsHtml = t.ikkeIndfriedeOpgaver
+            .map(
+                (wishItem) => `<li>
+                    <span>${wishItem.navn}${wishItem.mark === "/" ? ` <em style="color:var(--muted);">(evt. /)</em>` : ""}</span>
+                    <span>${wishItem.opgaveTimer > 0 ? `${formatNum(wishItem.opgaveTimer)} t` : ""}</span>
+                </li>`
+            )
+            .join("");
+
+        unfulfilledWrap.innerHTML = `
+            <div class="unfulfilled-tasks-toggle">
+                <span>▸ Ikke-indfriede opgaveønsker (${t.ikkeIndfriedeOpgaver.length})</span>
+            </div>
+            <ul class="unfulfilled-tasks-list hidden">${itemsHtml}</ul>
+        `;
+        unfulfilledWrap.querySelector(".unfulfilled-tasks-toggle").addEventListener("click", () => {
+            const list = unfulfilledWrap.querySelector(".unfulfilled-tasks-list");
+            const label = unfulfilledWrap.querySelector(".unfulfilled-tasks-toggle span");
+            const isOpen = !list.classList.contains("hidden");
+            list.classList.toggle("hidden");
+            label.textContent = `${isOpen ? "▸" : "▾"} Ikke-indfriede opgaveønsker (${t.ikkeIndfriedeOpgaver.length})`;
+        });
+        opgContainer.appendChild(unfulfilledWrap);
     }
 
     document.getElementById("fp-total-pill").textContent = `${formatNum(t.fpPointTildelt || 50)} pt tildelt`;
@@ -267,9 +395,9 @@ function renderOpgaverOgFunktioner(t) {
     ];
 
     const funkGroups = {};
-    t.funktioner.forEach((f) => {
-        if (!funkGroups[f.kategori]) funkGroups[f.kategori] = [];
-        funkGroups[f.kategori].push(f);
+    t.funktioner.forEach((funkObj) => {
+        if (!funkGroups[funkObj.kategori]) funkGroups[funkObj.kategori] = [];
+        funkGroups[funkObj.kategori].push(funkObj);
     });
 
     const orderedKeys = [
@@ -286,20 +414,24 @@ function renderOpgaverOgFunktioner(t) {
             catEl.textContent = kat;
             funkContainer.appendChild(catEl);
 
-            funkGroups[kat].forEach((f) => {
+            funkGroups[kat].forEach((funkObj) => {
                 const itemEl = document.createElement("div");
                 itemEl.className = "compact-item";
-                const peersSpan = f.peers.length ? ` <span class="compact-peers">(med ${f.peers.join(", ")})</span>` : "";
+                const peersSpan = funkObj.peers.length
+                    ? ` <span class="compact-peers">(med ${funkObj.peers.join(", ")})</span>`
+                    : "";
 
                 const extraDetails = [];
-                if (f.totalPoint !== f.point) extraDetails.push(`Samlet funktion: ${formatNum(f.totalPoint)} pt`);
-                if (f.kommentar) extraDetails.push(f.kommentar);
+                if (funkObj.totalPoint !== funkObj.point) {
+                    extraDetails.push(`Samlet funktion: ${formatNum(funkObj.totalPoint)} pt`);
+                }
+                if (funkObj.kommentar) extraDetails.push(funkObj.kommentar);
                 const hasDetails = extraDetails.length > 0;
 
                 itemEl.innerHTML = `
                     <div class="compact-row">
-                        <div class="compact-title">${f.navn}${peersSpan}${hasDetails ? `<span class="compact-caret">▸</span>` : ""}</div>
-                        <div class="compact-val">${formatNum(f.point)} pt</div>
+                        <div class="compact-title">${funkObj.navn}${peersSpan}${hasDetails ? `<span class="compact-caret">▸</span>` : ""}</div>
+                        <div class="compact-val">${formatNum(funkObj.point)} pt</div>
                     </div>
                     ${hasDetails ? `<div class="compact-drawer fp-drawer hidden">${extraDetails.join(" · ")}</div>` : ""}
                 `;
@@ -323,12 +455,12 @@ function renderFerieSection(t) {
     let brugtFF = 0;
     let afventerFF = 0;
 
-    t.ferie.forEach((f) => {
-        if (!f.type.toLowerCase().includes("feriefridag")) return;
-        const sLow = f.status.toLowerCase();
+    t.ferie.forEach((ferieObj) => {
+        if (!ferieObj.type.toLowerCase().includes("feriefridag")) return;
+        const sLow = ferieObj.status.toLowerCase();
         if (sLow.includes("ikke godkendt") || sLow.includes("afvist") || sLow === "nej") return;
 
-        const dageNum = parseNum(f.dage);
+        const dageNum = parseNum(ferieObj.dage);
         brugtFF += dageNum;
         if (!(sLow.includes("godkendt") || sLow.includes("registreret") || sLow === "ja" || sLow === "ok")) {
             afventerFF += dageNum;
@@ -355,30 +487,174 @@ function renderFerieSection(t) {
         return;
     }
 
-    t.ferie.forEach((f) => {
+    const getSortTimestamp = (ferieObj) => {
+        const dt = parseDkDate(ferieObj.datoFra) || parseDkDate(ferieObj.datoTil);
+        if (dt) return dt.getTime();
+        const ugeMatch = String(ferieObj.uge || "").match(/\d+/);
+        if (ugeMatch) {
+            const weekNum = parseInt(ugeMatch[0], 10);
+            const yearNum = weekNum >= 27 ? 2026 : 2027;
+            return Date.UTC(yearNum, 0, 1 + (weekNum - 1) * 7);
+        }
+        return Number.MAX_SAFE_INTEGER;
+    };
+
+    const sortedFerie = [...t.ferie].sort((a, b) => {
+        const diff = getSortTimestamp(a) - getSortTimestamp(b);
+        if (diff !== 0) return diff;
+        const endA = parseDkDate(a.datoTil)?.getTime() || Number.MAX_SAFE_INTEGER;
+        const endB = parseDkDate(b.datoTil)?.getTime() || Number.MAX_SAFE_INTEGER;
+        return endA - endB;
+    });
+
+    sortedFerie.forEach((ferieObj) => {
         let statusClass = "status-afventer";
-        const sLow = f.status.toLowerCase();
+        const sLow = ferieObj.status.toLowerCase();
         if (sLow.includes("ikke godkendt") || sLow.includes("afvist") || sLow === "nej") statusClass = "status-afvist";
         else if (sLow.includes("godkendt") || sLow === "ja" || sLow === "ok") statusClass = "status-godkendt";
         else if (sLow.includes("registreret")) statusClass = "status-registreret";
 
-        const ugeStr = f.uge ? `Uge ${f.uge}` : "";
-        const dageStr = f.dage ? `${f.dage} ${f.dage === "1" ? "dag" : "dage"}` : "";
-        const metaParts = [ugeStr, dageStr].filter(Boolean).join(" · ");
-        const titel = `${f.type || "Friønske"}${metaParts ? ` (${metaParts})` : ""}`;
+        const typeLow = (ferieObj.type || "").toLowerCase();
+        let borderClass = "is-fri";
+        if (typeLow.includes("ferie")) {
+            borderClass = "is-ferie";
+        } else if (
+            typeLow.includes("orlov") ||
+            typeLow.includes("barsel") ||
+            typeLow.includes("selvbetalt") ||
+            typeLow.includes("tjenestefri")
+        ) {
+            borderClass = "is-orlov";
+        }
 
-        const dateRange = f.datoFra && f.datoTil ? `${f.datoFra} – ${f.datoTil}` : f.datoFra || f.datoTil || "";
-        const subParts = [dateRange, f.kommentar].filter(Boolean).join(" · ");
+        const ugeStr = formatWeekRange(ferieObj.uge, ferieObj.datoFra, ferieObj.datoTil, ferieObj.dage);
+        const dageStr = ferieObj.dage ? `${ferieObj.dage} ${ferieObj.dage === "1" ? "dag" : "dage"}` : "";
+        const metaParts = [ugeStr, dageStr].filter(Boolean).join(" · ");
+        const titel = `${ferieObj.type || "Friønske"}${metaParts ? ` (${metaParts})` : ""}`;
+
+        const dateRange =
+            ferieObj.datoFra && ferieObj.datoTil
+                ? `${ferieObj.datoFra} – ${ferieObj.datoTil}`
+                : ferieObj.datoFra || ferieObj.datoTil || "";
+        const subParts = [dateRange, ferieObj.kommentar].filter(Boolean).join(" · ");
 
         ferieContainer.innerHTML += `
-            <div class="ferie-card">
+            <div class="ferie-card ${borderClass}">
                 <div class="ferie-header">
                     <strong>${titel}</strong>
-                    <span class="status-pill ${statusClass}">${f.status}</span>
+                    <span class="status-pill ${statusClass}">${ferieObj.status}</span>
                 </div>
                 ${subParts ? `<div class="ferie-body">${subParts}</div>` : ""}
             </div>`;
     });
+}
+
+function renderFagoenskerSection(t) {
+    const normPill = document.getElementById("fag-norm-pill");
+    const normParts = [];
+    if (t.fagWeeklyNormE26 > 0) normParts.push(`E26: ${formatNum(t.fagWeeklyNormE26)} t/uge`);
+    if (t.fagWeeklyNormF26 > 0 && t.fagWeeklyNormF26 !== t.fagWeeklyNormE26) {
+        normParts.push(`F26: ${formatNum(t.fagWeeklyNormF26)} t/uge`);
+    }
+    normPill.textContent = normParts.length ? `Vejledende norm: ${normParts.join(" · ")}` : "Fagønsker (5 perioder)";
+
+    const container = document.getElementById("fagoensker-container");
+    if (!t.fagoensker.length) {
+        container.innerHTML = `<div style="font-size:0.86em;color:var(--muted);padding:12px 0;">
+            Ingen fagønsker indlæst endnu. Indsæt CSV-links til <strong>Ønsker E2026</strong> og <strong>Ønsker F2026</strong> i <code>settings.js</code>.
+        </div>`;
+        return;
+    }
+
+    const renderBlockCol = (title, hours, blk) => {
+        const hasSubjects = blk.p1 || blk.p2;
+        const peerHtml = blk.peers.length ? ` <span class="fag-peers">${blk.peers.join(", ")}</span>` : "";
+        const p1Html = blk.p1 ? `<div class="fag-p1">${blk.p1}${peerHtml}</div>` : "";
+        const p2Html = blk.p2 ? `<div class="fag-p2">${blk.p2}</div>` : "";
+
+        return `
+            <div class="fag-col">
+                <div class="fag-col-head">${title} <span>${formatNum(hours)} t</span></div>
+                <div class="fag-col-body">
+                    ${hasSubjects ? `${p1Html}${p2Html}` : `<span class="fag-empty-dash">–</span>`}
+                </div>
+            </div>
+        `;
+    };
+
+    const cardsHtml = t.fagoensker
+        .map((periodObj) => {
+            const desiredHours =
+                (periodObj.idraet1.p1 || periodObj.idraet1.p2 ? periodObj.idraet1.hours : 0) +
+                (periodObj.idraet2.p1 || periodObj.idraet2.p2 ? periodObj.idraet2.hours : 0) +
+                (periodObj.kompetence.p1 || periodObj.kompetence.p2 ? periodObj.kompetence.hours : 0) +
+                (periodObj.inspirations.p1 || periodObj.inspirations.p2 ? periodObj.inspirations.hours : 0) +
+                (periodObj.dgl.ja ? periodObj.dgl.hours : 0) +
+                (periodObj.faellessang.ja ? periodObj.faellessang.hours : 0);
+
+            const allNotes = [
+                ...periodObj.generalNotes,
+                ...periodObj.idraet1.notes.map((n) => `Idræt 1: ${n}`),
+                ...periodObj.idraet2.notes.map((n) => `Idræt 2: ${n}`),
+                ...periodObj.kompetence.notes.map((n) => `Kompetencefag: ${n}`),
+                ...periodObj.inspirations.notes.map((n) => `Inspirationsfag: ${n}`),
+                ...periodObj.dgl.notes.map((n) => `DGL: ${n}`),
+                ...periodObj.faellessang.notes.map((n) => `Fællessang: ${n}`)
+            ];
+
+            const isEmpty = desiredHours === 0 && allNotes.length === 0;
+            const periodNorm =
+                periodObj.semester === "E26" ? t.fagWeeklyNormE26 : t.fagWeeklyNormF26 || t.fagWeeklyNormE26;
+
+            const pills = [];
+            if (periodObj.dgl.ja) {
+                pills.push(`<span class="fag-tag-pill">DGL · ${formatNum(periodObj.dgl.hours)} t</span>`);
+            }
+            if (periodObj.faellessang.ja) {
+                pills.push(`<span class="fag-tag-pill">Fællessang · ${formatNum(periodObj.faellessang.hours)} t</span>`);
+            }
+
+            const hoursHtml =
+                desiredHours > 0
+                    ? `<span class="fag-hours-badge"><strong>${formatNum(desiredHours)} t</strong>${periodNorm > 0 ? ` <span>/ ${formatNum(periodNorm)} t</span>` : ""}</span>`
+                    : `<span class="fag-hours-badge is-zero">0 t</span>`;
+
+            const notesFooterHtml =
+                allNotes.length > 0
+                    ? `<div class="fag-card-notes">${allNotes.map((n) => `<div>💬 ${n}</div>`).join("")}</div>`
+                    : "";
+
+            return `
+                <div class="fag-period-card ${isEmpty ? "is-empty" : ""}">
+                    <div class="fag-card-header">
+                        <div class="fag-card-title-group">
+                            <span class="fag-card-title">${periodObj.label}</span>
+                            ${pills.join("")}
+                        </div>
+                        ${hoursHtml}
+                    </div>
+                    ${
+                        isEmpty
+                            ? `<div class="fag-card-empty-msg">Ingen fagønsker registreret i denne periode.</div>`
+                            : `<div class="fag-card-grid">
+                                ${renderBlockCol("Idræt 1", periodObj.idraet1.hours, periodObj.idraet1)}
+                                ${renderBlockCol("Idræt 2", periodObj.idraet2.hours, periodObj.idraet2)}
+                                ${renderBlockCol("Kompetencefag", periodObj.kompetence.hours, periodObj.kompetence)}
+                                ${renderBlockCol("Inspirationsfag", periodObj.inspirations.hours, periodObj.inspirations)}
+                               </div>`
+                    }
+                    ${notesFooterHtml}
+                </div>
+            `;
+        })
+        .join("");
+
+    container.innerHTML = `<div class="fag-cards-list">${cardsHtml}</div>`;
+}
+
+function updateSimDisplay() {
+    const valEl = document.getElementById("sim-vaert-val");
+    if (valEl) valEl.textContent = `${simVaertReduktionCount} stk.`;
 }
 
 function renderTeacher(initials) {
@@ -391,28 +667,40 @@ function renderTeacher(initials) {
     document.getElementById("t-grad").textContent = t.grad;
     document.getElementById("t-uger-stat").textContent = t.undervisningsUgerInfo || "--";
 
+    updateSimDisplay();
     renderWeeksSection(t);
     renderLedger(t);
     renderOpgaverOgFunktioner(t);
     renderFerieSection(t);
+    renderFagoenskerSection(t);
 }
 
-// --- HENT / GENINDLÆS DATA ---
 async function loadAndRenderAll(activeTeacherGetter, bustCache = false) {
-    const [ugeRes, arbRes, funkRes, ferieRes] = await Promise.all([
+    const [ugeRes, arbRes, funkRes, ferieRes, fagE26Res, fagF26Res, wishUgeRes, wishArbRes] = await Promise.all([
         fetchSheet(CONFIG.SHEET_LINKS.ugefordeling, "Ugefordeling", bustCache),
         fetchSheet(CONFIG.SHEET_LINKS.arbejdstid, "Arbejdstid_Opgaver", bustCache),
         fetchSheet(CONFIG.SHEET_LINKS.funktionsplan, "Funktionsplan_E26-F27", bustCache),
-        fetchSheet(CONFIG.SHEET_LINKS.ferie, "Ferieønsker", bustCache)
+        fetchSheet(CONFIG.SHEET_LINKS.ferie, "Ferieønsker", bustCache),
+        fetchSheet(CONFIG.SHEET_LINKS.fagoenskerE26, "Fagønsker E26", bustCache),
+        fetchSheet(CONFIG.SHEET_LINKS.fagoenskerF26, "Fagønsker F26", bustCache),
+        fetchSheet(CONFIG.SHEET_LINKS.onskerUgefordeling, "Ønsker Ugefordeling", bustCache),
+        fetchSheet(CONFIG.SHEET_LINKS.onskerArbejdstid, "Ønsker Arbejdstid", bustCache)
     ]);
 
-    const built = buildAllTeachers(ugeRes, arbRes, funkRes, ferieRes);
+    const built = buildAllTeachers(ugeRes, arbRes, funkRes, ferieRes, fagE26Res, fagF26Res, wishUgeRes, wishArbRes);
     allTeachers = built.data;
 
     if (isAdmin) {
         const d = built.diagnostics;
         const fmtStatus = (label, item) =>
             item.count > 0 ? `✅ ${label} (${item.count})` : `⚠️ ${label}: ${item.msg}`;
+
+        const ugeWishStr =
+            d.onsker.ugeCount > 0 ? `✅ Ønske-uge (${d.onsker.ugeCount})` : `⚠️ Ønske-uge: ${d.onsker.msg || "0"}`;
+        const opgWishStr =
+            d.onsker.arbCount > 0
+                ? `✅ Ønske-opg (${d.onsker.arbCount})`
+                : `⚠️ Ønske-opg: ${d.onsker.arbMsg || d.onsker.msg || "0"}`;
 
         let statusDiv = document.getElementById("admin-diag-bar");
         if (!statusDiv) {
@@ -425,7 +713,10 @@ async function loadAndRenderAll(activeTeacherGetter, bustCache = false) {
             ${fmtStatus("Uge", d.uge)} &nbsp;|&nbsp;
             ${fmtStatus("Arbejdstid", d.arb)} &nbsp;|&nbsp;
             ${fmtStatus("Funk.", d.funk)} &nbsp;|&nbsp;
-            ${fmtStatus("Ferie", d.ferie)}
+            ${fmtStatus("Ferie", d.ferie)} &nbsp;|&nbsp;
+            ${fmtStatus("Fagønsker", d.fag)} &nbsp;|&nbsp;
+            ${ugeWishStr} &nbsp;|&nbsp;
+            ${opgWishStr}
             <button id="toggle-raw-btn" class="btn-small" style="margin-left:10px;">🔍 Vis rå ark-data</button>
             <pre id="raw-debug-pre" class="debug-box hidden"></pre>
         `;
@@ -470,6 +761,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const leaderBar = document.getElementById("leader-bar");
     const select = document.getElementById("teacher-select");
 
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const target = btn.dataset.tab;
+            document.querySelectorAll(".tab-btn").forEach((b) => b.classList.toggle("active", b === btn));
+            document.querySelectorAll(".tab-panel").forEach((p) => p.classList.toggle("hidden", p.id !== `tab-${target}`));
+        });
+    });
+
     if (isAdmin) {
         leaderBar.classList.remove("hidden");
         CONFIG.LAERERE.forEach((l) => {
@@ -481,7 +780,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         const remembered = sessionStorage.getItem("admin_selected_teacher");
         if (remembered && CONFIG.LAERERE.includes(remembered)) select.value = remembered;
 
-        select.addEventListener("change", (e) => renderTeacher(e.target.value));
+        select.addEventListener("change", (e) => {
+            simVaertReduktionCount = 0;
+            renderTeacher(e.target.value);
+        });
+
+        const simGroup = document.createElement("div");
+        simGroup.className = "sim-stepper";
+        simGroup.innerHTML = `
+            <span>Prøv færre værtsskaber:</span>
+            <button type="button" id="sim-vaert-minus" class="btn-step">−</button>
+            <strong id="sim-vaert-val">0 stk.</strong>
+            <button type="button" id="sim-vaert-plus" class="btn-step">+</button>
+        `;
+        leaderBar.querySelector(".leader-left").appendChild(simGroup);
+
+        document.getElementById("sim-vaert-minus").addEventListener("click", () => {
+            if (simVaertReduktionCount > 0) {
+                simVaertReduktionCount--;
+                renderTeacher(select.value);
+            }
+        });
+        document.getElementById("sim-vaert-plus").addEventListener("click", () => {
+            simVaertReduktionCount++;
+            renderTeacher(select.value);
+        });
+
+        const wishToggleLabel = document.createElement("label");
+        wishToggleLabel.className = "wish-toggle-pill";
+        wishToggleLabel.innerHTML = `<input type="checkbox" id="toggle-wishes-chk" checked /> Vis ønsker`;
+        leaderBar.querySelector(".leader-left").appendChild(wishToggleLabel);
+
+        document.getElementById("toggle-wishes-chk").addEventListener("change", (e) => {
+            showWishes = e.target.checked;
+            renderTeacher(select.value);
+        });
 
         const copyBtn = document.getElementById("copy-link-btn");
         copyBtn.addEventListener("click", async () => {

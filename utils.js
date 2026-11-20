@@ -27,10 +27,12 @@ function getTeacherUrl(initials) {
     return `${base}?u=${generateToken(initials)}`;
 }
 
-// --- CSV FETCH & PARSE ---
 function normalizeGoogleSheetUrl(rawUrl) {
     if (!rawUrl) return "";
     let url = rawUrl.trim();
+    if (url.includes("#gid=")) {
+        url = url.replace("#gid=", url.includes("?") ? "&gid=" : "?gid=");
+    }
     if (url.includes("/pubhtml")) {
         url = url.replace("/pubhtml", "/pub");
         const u = new URL(url);
@@ -142,4 +144,57 @@ function summarizeSheet(rows, label) {
         if (ne.length > 0) out.push(`R${idx}: ${ne.slice(0, 18).join(" | ")}`);
     });
     return out.join("\n");
+}
+
+// --- DATO & UGEBEREGNING ---
+function parseDkDate(str) {
+    if (!str) return null;
+    const parts = String(str)
+        .trim()
+        .split(/[/.\-]/)
+        .map((p) => parseInt(p, 10))
+        .filter((n) => !isNaN(n));
+    if (parts.length < 2) return null;
+
+    const d = parts[0];
+    const m = parts[1];
+    let y = parts.length >= 3 ? parts[2] : m >= 7 ? 2026 : 2027;
+    if (y < 100) y += 2000;
+
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return isNaN(dt.getTime()) ? null : dt;
+}
+
+function getIsoWeek(dateObj) {
+    if (!dateObj) return null;
+    const d = new Date(Date.UTC(dateObj.getUTCFullYear(), dateObj.getUTCMonth(), dateObj.getUTCDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+}
+
+function formatWeekRange(ugeStr, datoFra, datoTil, dageStr) {
+    const rawUge = String(ugeStr || "").trim();
+    if (/\d+\s*[-–]\s*\d+/.test(rawUge)) {
+        return `Uge ${rawUge.replace("-", "–")}`;
+    }
+
+    const d1 = parseDkDate(datoFra);
+    const d2 = parseDkDate(datoTil);
+    const startW = /^\d+$/.test(rawUge) ? parseInt(rawUge, 10) : getIsoWeek(d1);
+    if (!startW) return "";
+
+    let endW = getIsoWeek(d2);
+    if (!endW) {
+        const dage = parseNum(dageStr);
+        if (dage > 5) {
+            const weeksSpan = Math.ceil(dage / 5);
+            endW = ((startW + weeksSpan - 2) % 52) + 1;
+        } else {
+            endW = startW;
+        }
+    }
+
+    return startW === endW ? `Uge ${startW}` : `Uge ${startW}–${endW}`;
 }

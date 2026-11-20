@@ -703,3 +703,523 @@ h2 {
     .no-print { display: none !important; }
     .compact-caret, .ledger-caret { display: none; }
 }
+
+.ferie-card {
+    background: #fdfdfe;
+    border: 1px solid var(--border);
+    border-left: 4px solid #8c9ba5;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 7px;
+    font-size: 0.84em;
+    break-inside: avoid;
+}
+
+.ferie-card.is-ferie {
+    border-left-color: #d64541;
+}
+
+.ferie-card.is-orlov {
+    border-left-color: #2c3e50;
+}
+
+/* Leder-stepper & reduktionslinjer i regnskab */
+.sim-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid #ffd54f;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.84em;
+    color: var(--primary);
+}
+
+.btn-step {
+    background: #eef3f7;
+    border: 1px solid #cbd6e0;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-step:hover {
+    background: #dce6ef;
+}
+
+.ledger-pre-red {
+    font-weight: 600;
+    color: var(--primary);
+    border-top: 1px solid #d5dfe8;
+    margin-top: 4px;
+}
+
+.ledger-reduction {
+    background: #f4fbf7;
+    border-left: 3px solid #27ae60;
+    padding-left: 8px;
+}
+
+.ledger-plus {
+    color: #1e8449;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
+.ledger-reductions-wrap {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed #cfd8dc;
+}
+
+.ledger-reduction {
+    background: #f4fbf7;
+    border-left: 3px solid #27ae60;
+    border-radius: 4px;
+    padding-left: 8px;
+    margin-bottom: 4px;
+}
+
+.ledger-plus {
+    color: #1e8449;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
+/* Faner */
+.app-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 18px;
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 8px 14px;
+    margin-bottom: -2px;
+    font-size: 0.92em;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab-btn:hover {
+    color: var(--primary);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Fagønsker-tabel (5 perioder) */
+.fag-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+}
+
+.fag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85em;
+    min-width: 820px;
+}
+
+.fag-table th {
+    background: #f1f5f8;
+    color: var(--primary);
+    text-align: left;
+    padding: 9px 10px;
+    border-bottom: 2px solid var(--border);
+    font-size: 0.84em;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.fag-table th small {
+    display: block;
+    font-weight: 500;
+    text-transform: none;
+    color: var(--muted);
+    font-size: 0.85em;
+}
+
+.fag-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #e6ecf0;
+    vertical-align: top;
+}
+
+.fag-table tr:last-child td {
+    border-bottom: none;
+}
+
+.fag-table tr.is-empty-period {
+    background: #fafbfc;
+    color: var(--muted);
+}
+
+.fag-period-cell {
+    width: 145px;
+    background: #f9fbfc;
+    border-right: 1px solid var(--border);
+}
+
+.fag-period-title {
+    font-weight: 700;
+    color: var(--primary);
+    display: block;
+}
+
+.fag-period-hours {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 0.82em;
+    background: #eef3f7;
+    color: var(--primary);
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.fag-p1 {
+    font-weight: 600;
+    color: var(--primary);
+    display: block;
+}
+
+.fag-peers {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.9em;
+}
+
+.fag-p2 {
+    display: block;
+    font-size: 0.86em;
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+.fag-note {
+    display: block;
+    font-size: 0.82em;
+    color: #8e44ad;
+    font-style: italic;
+    margin-top: 3px;
+}
+
+.fag-yes-pill {
+    display: inline-block;
+    background: #eafaf1;
+    color: #1e8449;
+    border: 1px solid #a9dfbf;
+    font-weight: 700;
+    font-size: 0.84em;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.fag-no-dash {
+    color: #bdc3c7;
+}
+
+/* Fagønsker-kort (5 perioder) */
+.fag-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fag-period-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    break-inside: avoid;
+}
+
+.fag-period-card.is-empty {
+    background: #fafbfc;
+    opacity: 0.78;
+}
+
+.fag-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #f4f7fa;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.fag-card-title-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.fag-card-title {
+    font-weight: 700;
+    font-size: 0.96em;
+    color: var(--primary);
+    margin-right: 4px;
+}
+
+.fag-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #eafaf1;
+    color: #1e8449;
+    border: 1px solid #a9dfbf;
+    font-size: 0.76em;
+    font-weight: 700;
+    padding: 1px 9px;
+    border-radius: 12px;
+}
+
+.fag-hours-badge {
+    font-size: 0.82em;
+    color: var(--primary);
+    background: #ffffff;
+    border: 1px solid #d5dfe8;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.fag-hours-badge span {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.fag-hours-badge.is-zero {
+    color: var(--muted);
+    background: transparent;
+}
+
+.fag-card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.fag-col {
+    padding: 9px 12px;
+    border-right: 1px solid #edf2f6;
+}
+
+.fag-col:last-child {
+    border-right: none;
+}
+
+.fag-col-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.71em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.fag-col-head span {
+    font-weight: 500;
+    text-transform: none;
+    opacity: 0.85;
+}
+
+.fag-p1 {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: var(--primary);
+    line-height: 1.35;
+}
+
+.fag-peers {
+    font-size: 0.82em;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 3px;
+}
+
+.fag-p2 {
+    font-size: 0.78em;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.3;
+}
+
+.fag-empty-dash {
+    color: #bdc3c7;
+    font-size: 0.88em;
+}
+
+.fag-card-empty-msg {
+    padding: 10px 14px;
+    font-size: 0.83em;
+    color: var(--muted);
+    font-style: italic;
+}
+
+.fag-card-notes {
+    border-top: 1px dashed var(--border);
+    background: #faf8fc;
+    padding: 7px 14px;
+    font-size: 0.81em;
+    color: #5b3275;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+@media (max-width: 780px) {
+    .fag-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .fag-col:nth-child(2) {
+        border-right: none;
+    }
+    .fag-col:nth-child(1),
+    .fag-col:nth-child(2) {
+        border-bottom: 1px solid #edf2f6;
+    }
+}
+
+/* Diskret ønske-sammenligning */
+.wish-toggle-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: white;
+    border: 1px solid #ffd54f;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.84em;
+    font-weight: 600;
+    color: var(--primary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.week-cell-head {
+    position: relative;
+}
+
+.week-wish-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #e67e22;
+}
+
+.banner-wish-note {
+    color: #8e44ad;
+    font-weight: 600;
+}
+
+.shared-week-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.wish-tag-ok {
+    display: inline-block;
+    font-size: 0.76em;
+    font-weight: 600;
+    color: #1e8449;
+    background: #eafaf1;
+    border: 1px solid #b7e4c7;
+    padding: 0 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.wish-tag-flex {
+    display: inline-block;
+    font-size: 0.76em;
+    font-weight: 600;
+    color: #1f618d;
+    background: #ebf5fb;
+    border: 1px solid #aed6f1;
+    padding: 0 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.wish-tag-diff {
+    display: inline-block;
+    font-size: 0.76em;
+    font-weight: 600;
+    color: #9a5b13;
+    background: #fff8e7;
+    border: 1px solid #f5cba7;
+    padding: 0 6px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.unfulfilled-weeks-line {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+    font-size: 0.79em;
+    color: #5d6d7e;
+}
+
+.unfulfilled-tasks-box {
+    margin-top: 10px;
+    background: #f8fafb;
+    border: 1px dashed #cbd6e0;
+    border-radius: 5px;
+    padding: 6px 9px;
+    font-size: 0.8em;
+    color: var(--muted);
+}
+
+.unfulfilled-tasks-toggle {
+    cursor: pointer;
+    font-weight: 600;
+    color: #4a5a6a;
+}
+
+.unfulfilled-tasks-list {
+    list-style: none;
+    margin: 5px 0 0 0;
+    padding: 4px 0 0 8px;
+    border-top: 1px dashed #dce2e7;
+}
+
+.unfulfilled-tasks-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    gap: 8px;
+}

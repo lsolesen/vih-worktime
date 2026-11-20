@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <!-- HOVEDINDHOLD (One-Pager) -->
+    <!-- HOVEDINDHOLD -->
     <div id="main-app" class="container hidden">
         <header>
             <div>
@@ -41,87 +41,107 @@
             <div class="header-badges" style="align-items: center;">
                 <span class="badge">Ansættelsesgrad: <strong id="t-grad">--</strong></span>
                 <span class="badge badge-outline">Undervisningsuger: <strong id="t-uger-stat">--</strong></span>
-                <button id="refresh-data-btn" class="btn-secondary no-print" type="button" title="Genindlæs nyeste tal fra Google Sheets" style="margin-left: 6px; font-size: 0.85em; padding: 5px 12px;">🔄 Opdater data</button>
-                <button onclick="window.print()" class="btn-secondary no-print" type="button" style="margin-left: 6px; font-size: 0.85em; padding: 5px 12px;">🖨️ Print / PDF</button>
+                <button id="refresh-data-btn" class="btn-secondary no-print" type="button" title="Genindlæs nyeste tal fra Google Sheets">🔄 Opdater data</button>
+                <button onclick="window.print()" class="btn-secondary no-print" type="button">🖨️ Print / PDF</button>
             </div>
         </header>
 
-        <!-- UGEFORDELING -->
-        <section class="timeline-section">
-            <div class="section-title-row">
-                <div class="title-with-toggle">
-                    <h2>Ugefordeling E2026 / F2027</h2>
-                    <button id="toggle-weeks-btn" class="btn-toggle no-print" type="button">Vis ugeplan ▾</button>
+        <!-- FANER -->
+        <nav class="app-tabs no-print" aria-label="Sektionsfaner">
+            <button type="button" class="tab-btn active" data-tab="oversigt">📊 Arbejdstid & Opgaver</button>
+            <button type="button" class="tab-btn" data-tab="fagoensker">🎓 Fagønsker (5 perioder)</button>
+        </nav>
+
+        <!-- FANE 1: OVERSIGT (One-Pager) -->
+        <div id="tab-oversigt" class="tab-panel">
+            <!-- UGEFORDELING -->
+            <section class="timeline-section">
+                <div class="section-title-row">
+                    <div class="title-with-toggle">
+                        <h2>Ugefordeling E2026 / F2027</h2>
+                        <button id="toggle-weeks-btn" class="btn-toggle no-print" type="button">Vis ugeplan ▾</button>
+                    </div>
+                    <div id="week-summary-pills" class="week-summary-pills"></div>
                 </div>
-                <div id="week-summary-pills" class="week-summary-pills"></div>
+
+                <div id="weeks-collapsible-body" class="weeks-body collapsed">
+                    <div class="semester-block">
+                        <div class="semester-label">Efterår 2026 (Uge 32–52)</div>
+                        <div class="timeline" id="timeline-efteraar"></div>
+                    </div>
+
+                    <div class="semester-block">
+                        <div class="semester-label">Forår 2027 (Uge 1–26)</div>
+                        <div class="timeline" id="timeline-foraar"></div>
+                    </div>
+
+                    <div class="semester-block">
+                        <div class="semester-label">Sommer 2027 (Uge 27–31)</div>
+                        <div class="timeline timeline-sommer" id="timeline-sommer"></div>
+                    </div>
+
+                    <div class="click-hint-row">Klik på en uge for at se indhold og kolleger</div>
+                    <div id="week-detail-banner" class="week-detail-banner hidden"></div>
+
+                    <div class="shared-weeks-box">
+                        <h3>Særlige uger & hvem du er afsted / hjemme med</h3>
+                        <div id="shared-weeks-container" class="shared-weeks-grid"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2-KOLONNE HOVEDDEL -->
+            <div class="grid-2col">
+                <!-- VENSTRE KOLONNE -->
+                <div class="col-left">
+                    <h2>Arbejdstidsregnskab (nedtælling)</h2>
+                    <div id="countdown-ledger" class="ledger-card"></div>
+
+                    <h2 style="margin-top: 22px;">Opgaver, Rejser & Temauger</h2>
+                    <p class="section-subtext">
+                        Viser <strong>opgavetimerne</strong>, der trækkes fra puljen (klik på en opgave for at se den samlede tid).
+                    </p>
+                    <div id="opgaver-container"></div>
+                </div>
+
+                <!-- HØJRE KOLONNE -->
+                <div class="col-right">
+                    <div class="fp-header-row">
+                        <h2>Funktionsplan (Ansvarsområder)</h2>
+                        <span class="fp-pill" id="fp-total-pill">-- pt</span>
+                    </div>
+                    <div id="funktioner-container"></div>
+
+                    <!-- FRI & FERIEØNSKER -->
+                    <div class="fp-header-row" style="margin-top: 26px;">
+                        <h2>Fri- & Ferieønsker</h2>
+                        <span class="fp-pill" id="ff-count-pill">Feriefridage: -- / 5</span>
+                    </div>
+                    <div class="ferie-rules-box">
+                        <div><strong>Ferie (5 uger):</strong> 4 uger i sommerferien (ift. sommerkursus) + 1 uge i juleferien – afholdes som hele uger.</div>
+                        <div><strong>Feriefridage (5 dage):</strong> Ønskes frit i semestret (tilstræb hele uger).</div>
+                        <div class="ferie-rules-note">Som udgangspunkt afholdes ferie og feriefridage ikke i opstarts- og afslutningsuger.</div>
+                    </div>
+                    <div id="ferie-container"></div>
+                </div>
             </div>
-
-            <div id="weeks-collapsible-body" class="weeks-body collapsed">
-                <div class="semester-block">
-                    <div class="semester-label">Efterår 2026 (Uge 32–52)</div>
-                    <div class="timeline" id="timeline-efteraar"></div>
-                </div>
-
-                <div class="semester-block">
-                    <div class="semester-label">Forår 2027 (Uge 1–26)</div>
-                    <div class="timeline" id="timeline-foraar"></div>
-                </div>
-
-                <div class="semester-block">
-                    <div class="semester-label">Sommer 2027 (Uge 27–31)</div>
-                    <div class="timeline timeline-sommer" id="timeline-sommer"></div>
-                </div>
-
-                <div class="click-hint-row">Klik på en uge for at se indhold og kolleger</div>
-                <div id="week-detail-banner" class="week-detail-banner hidden"></div>
-
-                <div class="shared-weeks-box">
-                    <h3>Særlige uger & hvem du er afsted / hjemme med</h3>
-                    <div id="shared-weeks-container" class="shared-weeks-grid"></div>
-                </div>
+        </div>
+        <!-- FANE 2: FAGØNSKER (5 PERIODER) -->
+        <div id="tab-fagoensker" class="tab-panel hidden">
+            <div class="fp-header-row">
+                <h2>Fagønsker fordelt på 5 perioder</h2>
+                <span class="fp-pill" id="fag-norm-pill">Vejledende ugenorm: --</span>
             </div>
-        </section>
-
-        <!-- 2-KOLONNE HOVEDDEL -->
-        <div class="grid-2col">
-            <!-- VENSTRE KOLONNE -->
-            <div class="col-left">
-                <h2>Arbejdstidsregnskab (nedtælling)</h2>
-                <div id="countdown-ledger" class="ledger-card"></div>
-
-                <h2 style="margin-top: 22px;">Opgaver, Rejser & Temauger</h2>
-                <p class="section-subtext">
-                    Viser <strong>opgavetimerne</strong>, der trækkes fra puljen (klik på en opgave for at se den samlede tid).
-                </p>
-                <div id="opgaver-container"></div>
-            </div>
-
-            <!-- HØJRE KOLONNE -->
-            <div class="col-right">
-                <div class="fp-header-row">
-                    <h2>Funktionsplan (Ansvarsområder)</h2>
-                    <span class="fp-pill" id="fp-total-pill">-- pt</span>
-                </div>
-                <div id="funktioner-container"></div>
-
-                <!-- FRI & FERIEØNSKER -->
-                <div class="fp-header-row" style="margin-top: 26px;">
-                    <h2>Fri- & Ferieønsker</h2>
-                    <span class="fp-pill" id="ff-count-pill">Feriefridage: -- / 5</span>
-                </div>
-                <div class="ferie-rules-box">
-                    <div><strong>Ferie (5 uger):</strong> 4 uger i sommerferien (ift. sommerkursus) + 1 uge i juleferien – afholdes som hele uger.</div>
-                    <div><strong>Feriefridage (5 dage):</strong> Ønskes frit i semestret (tilstræb hele uger).</div>
-                    <div class="ferie-rules-note">Som udgangspunkt afholdes ferie og feriefridage ikke i opstarts- og afslutningsuger.</div>
-                </div>
-                <div id="ferie-container"></div>
-            </div>
+            <p class="section-subtext">
+                <strong>1. prioritet</strong> står øverst med evt. kolleger (samme 1. prio) i mindre skrift ved siden af, og 2. prioritet står mindre nedenunder.
+            </p>
+            <div id="fagoensker-container"></div>
         </div>
     </div>
 
-    <script src="./settings.js"></script>
-    <script src="./utils.js"></script>
-    <script src="./parsers.js"></script>
-    <script src="./app.js"></script>
+    <script src="settings.js"></script>
+    <script src="utils.js"></script>
+    <script src="parsers.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
